@@ -1,12 +1,16 @@
 package maxtemperature;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
+//import org.apache.hadoop.mapred.FileInputFormat;
+//import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+//import org.apache.hadoop.mapred.JobClient;
+//import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.Job;
 
 // Reference: Page 33 of "Hadoop: The Definitive Guide"
 public class MaxTemperature {
@@ -16,21 +20,21 @@ public class MaxTemperature {
 			System.exit(-1);
 		}
 		
-//		Job job = new Job();
-//		job.setJarByClass(MaxTemperature.class);
-//		job.setJobName("Max temperature");
-		JobConf conf = new JobConf(MaxTemperature.class);
-		conf.setJobName("Max temperature");
+		Configuration conf = new Configuration();
+		Job job = Job.getInstance(conf, "Max temperature");
+		job.setJarByClass(MaxTemperature.class);
 		
-		FileInputFormat.addInputPath(conf, new Path(args[0]));
-		FileOutputFormat.setOutputPath(conf, new Path(args[1]));
+		FileInputFormat.addInputPath(job, new Path(args[0]));
+		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 		
-		conf.setMapperClass(MaxTemperatureMapper.class);
-		conf.setReducerClass(MaxTemperatureReducer.class);
+		job.setMapperClass(MaxTemperatureMapper.class);
+		job.setReducerClass(MaxTemperatureReducer.class);
 		
-		conf.setOutputKeyClass(Text.class);
-		conf.setOutputValueClass(IntWritable.class);
+//		job.setMapOutputKeyClass(Text.class);
+//		job.setMapOutputValueClass(IntWritable.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(IntWritable.class);
 		
-		JobClient.runJob(conf);
+		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
